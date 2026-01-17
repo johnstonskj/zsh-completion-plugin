@@ -41,23 +41,6 @@ completion_plugin_init() {
     builtin emulate -L zsh
     builtin setopt extended_glob warn_create_global typeset_silent no_short_loops rc_quotes no_auto_pushd
 
-    # Export any additional environment variables here.
-    #  @zplugin_save_global completion <VAR_NAME>
-
-    # Define any aliases here, or in their own section below.
-
-    # This should be the LAST step.
-    @zplugin_register completion
-}
-@zplugin_remember_fn completion_plugin_init
-
-# See https://wiki.zshell.dev/community/zsh_plugin_standard#unload-function
-completion_plugin_unload() {
-    builtin emulate -L zsh
-
-    # This should be the FIRST step.
-    @zplugin_unregister completion
-
     export skip_global_compinit=1
 
     setopt COMPLETE_IN_WORD     # Complete from both ends of a word.
@@ -75,7 +58,7 @@ completion_plugin_unload() {
     # shell is opened each day.
     autoload -Uz compinit
 
-    _comp_path="${ZSH_COMPDUMP}"
+    local _comp_path="${ZSH_COMPDUMP}"
 
     # #q expands globs in conditional expressions
     if [[ $_comp_path(#qNmh-20) ]]; then
@@ -87,11 +70,22 @@ completion_plugin_unload() {
         # Keep $_comp_path younger than cache time even if it isn't regenerated.
         touch "$_comp_path"
     fi
-    unset _comp_path
 
     zmodload zsh/complist
     zmodload zsh/curses
     autoload -Uz colors && colors
+
+    # This should be the LAST step.
+    @zplugin_register completion
+}
+@zplugin_remember_fn completion_plugin_init
+
+# See https://wiki.zshell.dev/community/zsh_plugin_standard#unload-function
+completion_plugin_unload() {
+    builtin emulate -L zsh
+
+    # This should be the FIRST step.
+    @zplugin_unregister completion
 
     # This should be the LAST step.
     unfunction completion_plugin_unload
