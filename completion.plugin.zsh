@@ -1,7 +1,7 @@
 # -*- mode: sh; eval: (sh-set-shell "zsh") -*-
 #
 # Name: completion
-# Description: Zsh plugin to do something...
+# Description: Zsh plugin to setup Zsh completion.
 # Repository: https://github.com/johnstonskj/zsh-completion-plugin
 #
 # Long description TBD.
