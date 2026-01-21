@@ -6,28 +6,22 @@
 #
 # Long description TBD.
 #
-# Public variables:
+# State variables:
 #
-# * `COMPLETION`; plugin-defined global associative array with the following keys:
+# * `PLUGIN`; plugin-defined global associative array with the following keys:
 #   * `_FUNCTIONS`; a list of all functions defined by the plugin.
 #   * `_PLUGIN_DIR`; the directory the plugin is sourced from.
 #   * `_PLUGIN_DIR`; the file in _PLUGIN_DIR the plugin is sourced from.
-# * `COMPLETION_EXAMPLE`; if set it does something magical.
 #
 
 ############################################################################
-# Standard Setup Behavior
+# Plugin Setup
 ############################################################################
 
-0="$(@zplugin_normalize_zero "${0}")"
-
-@zplugin_declare_global completion "${0}"
-    # To add custom directories to PATH:
-    # path DIR
-    # To add custom directories to FPATH:
-    # fpath DIR
-    # To save any global variables:
-    # save VAR_NAME
+typeset -A PLUGIN
+PLUGIN[_PATH]="$(@zplugins_normalize_zero "$0")"
+PLUGIN[_NAME]="${${PLUGIN[_PATH]:t}%%.*}"
+PLUGIN[_CONTEXT]="$(@zplugins_plugin_context ${PLUGIN[_NAME]})"
 
 ############################################################################
 # Plugin Lifecycle
@@ -76,9 +70,9 @@ completion_plugin_init() {
     autoload -Uz colors && colors
 
     # This should be the LAST step.
-    @zplugin_register completion
+    @zplugin_register completion ${PLUGIN[_PATH]}
 }
-@zplugin_remember_fn completion_plugin_init
+@zplugins_remember_fn completion_plugin_init
 
 # See https://wiki.zshell.dev/community/zsh_plugin_standard#unload-function
 completion_plugin_unload() {
@@ -98,10 +92,12 @@ completion_plugin_unload() {
 @completion_add_dir() {
     @zplugin_add_to_fpath "${1}" "${2}"
 }
+@zplugins_remember_fn @completion_add_dir
 
 @completion_remove_dir() {
     @zplugin_remove_from_fpath "${1}" "${2}"
 }
+@zplugins_remember_fn @completion_remove_dir
 
 ############################################################################
 # Plugin Initialization
