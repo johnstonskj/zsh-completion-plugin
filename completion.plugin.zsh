@@ -1,22 +1,25 @@
 # -*- mode: sh; eval: (sh-set-shell "zsh") -*-
 #
-# Name: completion
-# Description: Zsh plugin to setup Zsh completion.
-# Repository: https://github.com/johnstonskj/zsh-completion-plugin
+# @name completion
+# @brief Zsh plugin to setup Zsh completion.
+# @repository https://github.com/johnstonskj/zsh-completion-plugin
+#
+# @description
 #
 # Long description TBD.
 #
-# State variables:
+# ### State Variables
 #
-# * `PLUGIN`; plugin-defined global associative array with the following keys:
-#   * `_FUNCTIONS`; a list of all functions defined by the plugin.
-#   * `_PLUGIN_DIR`; the directory the plugin is sourced from.
-#   * `_PLUGIN_DIR`; the file in _PLUGIN_DIR the plugin is sourced from.
+# * **PLUGIN**: Plugin-defined global associative array with the following keys:
+#   * **_PATH**: The path to the plugin's sourced file.
+#   * **_NAME**: The name of the plugin.
+#   * **_CONTEXT**: The plugin's state context path.
 #
 
 ############################################################################
-# Plugin Setup
-############################################################################
+# @section Setup
+# @description Standard path and variable setup.
+#
 
 typeset -A PLUGIN
 PLUGIN[_PATH]="$(@zplugins_normalize_zero "$0")"
@@ -24,12 +27,17 @@ PLUGIN[_NAME]="${${PLUGIN[_PATH]:t}%%.*}"
 PLUGIN[_CONTEXT]="$(@zplugins_plugin_context ${PLUGIN[_NAME]})"
 
 ############################################################################
-# Plugin Lifecycle
-############################################################################
+# @section Lifecycle
+# @description Plugin lifecycle functions.
+#
 
+#
+# @description 
 #
 # This function does the initialization of variables in the global variable
 # `COMPLETION`. It also adds to `path` and `fpath` as necessary.
+#
+# @noargs
 #
 completion_plugin_init() {
     builtin emulate -L zsh
@@ -74,7 +82,13 @@ completion_plugin_init() {
 }
 @zplugins_remember_fn completion_plugin_init
 
-# See https://wiki.zshell.dev/community/zsh_plugin_standard#unload-function
+#
+# @description
+#
+# Called when the plugin is unloaded to clean up after itself.
+#
+# @noargs
+#
 completion_plugin_unload() {
     builtin emulate -L zsh
 
@@ -86,22 +100,36 @@ completion_plugin_unload() {
 }
 
 ############################################################################
-# Plugin Public Things
-############################################################################
+# @section Public
+# @description Public functions, aliases, and varibles.
+#
 
+#
+# @description Add a new directory to `fpath`.
+#
+# @arg $1 string The name of a plugin which will remember this path.
+# @arg $2 path The path to add.
+#
 @completion_add_dir() {
     @zplugin_add_to_fpath "${1}" "${2}"
 }
 @zplugins_remember_fn @completion_add_dir
 
+#
+# @description Remove a new directory from `fpath`.
+#
+# @arg $1 string The name of a plugin which remembered this path.
+# @arg $2 path The path to remove.
+#
 @completion_remove_dir() {
     @zplugin_remove_from_fpath "${1}" "${2}"
 }
 @zplugins_remember_fn @completion_remove_dir
 
 ############################################################################
-# Plugin Initialization
-############################################################################
+# @section Initialization
+# @description Final plugin initialization.
+#
 
 completion_plugin_init
 
