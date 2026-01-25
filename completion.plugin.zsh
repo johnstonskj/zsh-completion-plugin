@@ -76,27 +76,6 @@ completion_plugin_init() {
     zmodload zsh/complist
     zmodload zsh/curses
     autoload -Uz colors && colors
-
-    # This should be the LAST step.
-    @zplugin_register completion ${PLUGIN[_PATH]}
-}
-@zplugins_remember_fn completion_plugin_init
-
-#
-# @description
-#
-# Called when the plugin is unloaded to clean up after itself.
-#
-# @noargs
-#
-completion_plugin_unload() {
-    builtin emulate -L zsh
-
-    # This should be the FIRST step.
-    @zplugin_unregister completion
-
-    # This should be the LAST step.
-    unfunction completion_plugin_unload
 }
 
 ############################################################################
@@ -113,7 +92,7 @@ completion_plugin_unload() {
 @completion_add_dir() {
     @zplugin_add_to_fpath "${1}" "${2}"
 }
-@zplugins_remember_fn @completion_add_dir
+@zplugins_remember_fn completion @completion_add_dir
 
 #
 # @description Remove a new directory from `fpath`.
@@ -124,13 +103,27 @@ completion_plugin_unload() {
 @completion_remove_dir() {
     @zplugin_remove_from_fpath "${1}" "${2}"
 }
-@zplugins_remember_fn @completion_remove_dir
+@zplugins_remember_fn completion @completion_remove_dir
 
-############################################################################
-# @section Initialization
-# @description Final plugin initialization.
-#
+# @arg $1 string The plugin's name.
+# @arg $2 path The plugin's source path.
+# @arg $3 string The command to run to generate the completion file.
+# @arg $4 string The name of the fun
+# 
+@completion_generate_local_file() {
+    local plugin_name="${1}"
+    local plugin_path="${2}"
+    local command_name="${3}"
+    shift 3
+    local -a command_args=( $@ )
 
-completion_plugin_init
-
-true
+    local function_path="${plugin_path:h}/functions"
+    if [[ ! -d "${function_path}" ]]; then
+        mkdir -p "${function_path}" > /dev/null 2>&1
+    fi
+    local completion_file="${function_path}/_${command_name}"
+    ${command_name} ${command_args[@]} > "${completion_file}"
+    autoload -Uz "${completion_file}"
+    @zplugins_remember_fn ${plugin_name} "${completion_file:t}"
+}
+@zplugins_remember_fn completion @completion_generate_local_file
